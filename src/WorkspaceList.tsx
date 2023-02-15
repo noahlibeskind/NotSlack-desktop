@@ -37,6 +37,7 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
     }, [loggedInUser]);
 
     return (
+        
         <div>
             <ul>
                 {workspaces.map(workspace => (

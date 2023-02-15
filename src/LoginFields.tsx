@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 
 interface LoginProps {
-    setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+    loggedInAttempt: number,
+    setLoggedInAttempt: React.Dispatch<React.SetStateAction<number>>;
     setLoggedInUser: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const LoginFields: React.FC<LoginProps> = ({ setLoggedIn, setLoggedInUser }) => {
+const LoginFields: React.FC<LoginProps> = ({ loggedInAttempt, setLoggedInAttempt, setLoggedInUser }) => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
     const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setLoggedInAttempt(0);
         setEmail(event.target.value);
     };
 
@@ -35,9 +37,10 @@ const LoginFields: React.FC<LoginProps> = ({ setLoggedIn, setLoggedInUser }) => 
         .then(json => {
             console.log(json);
             setLoggedInUser(json);
-            setLoggedIn(true)
         })
         .catch(error => {
+            setLoggedInAttempt(loggedInAttempt + 1)
+            console.log(loggedInAttempt)
             console.error("Login error:", error);
         });
       };

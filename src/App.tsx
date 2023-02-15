@@ -5,10 +5,10 @@ import LoginFields from './LoginFields';
 import WorkspaceList from './WorkspaceList';
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState<boolean>(false)
+  const [loggedInAttempt, setLoggedInAttempt] = useState<number>(0)
   const [loggedInUser, setLoggedInUser] = useState<any>(null)
 
-  if (loggedIn) {
+  if (loggedInUser) {
     console.log(loggedInUser);
     return (
       <div className="App">
@@ -26,9 +26,17 @@ function App() {
         <header className="App-header">
           <h1>NotSlack for Desktop</h1>
           <div>
-            <LoginFields setLoggedIn={setLoggedIn} setLoggedInUser={setLoggedInUser}
+            <LoginFields loggedInAttempt={loggedInAttempt} setLoggedInAttempt={setLoggedInAttempt} setLoggedInUser={setLoggedInUser}
             />
           </div>
+          {loggedInAttempt > 0 ?
+            <p>
+              Invalid credentials. {loggedInAttempt} attempts for this email address.
+            </p>
+            :
+            <p></p>
+          }
+          
         </header>
       </div>
     );
