@@ -2,30 +2,20 @@ import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import LoginFields from './LoginFields';
-
-
-
-
+import WorkspaceList from './WorkspaceList';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState<boolean>(false)
-
-  // const [localLoggedIn, setLocalLoggedIn] = useState(false)
-
-  // useEffect(() => {
-  //   console.log(localLoggedIn)
-  //   setLocalLoggedIn(loggedIn)
-  // }, [loggedIn])
+  const [loggedInUser, setLoggedInUser] = useState<any>(null)
 
   if (loggedIn) {
+    console.log(loggedInUser);
     return (
       <div className="App">
         <header className="App-header">
           <h4>Workspaces</h4>
           <div>
-            <p>
-              Hello user!
-            </p>
+            <WorkspaceList loggedInUser={loggedInUser} setLoggedInUser={setLoggedInUser}/>
           </div>
         </header>
       </div>
@@ -36,7 +26,7 @@ function App() {
         <header className="App-header">
           <h1>NotSlack for Desktop</h1>
           <div>
-            <LoginFields loggedIn={loggedIn} setLoggedIn={setLoggedIn}
+            <LoginFields setLoggedIn={setLoggedIn} setLoggedInUser={setLoggedInUser}
             />
           </div>
         </header>
