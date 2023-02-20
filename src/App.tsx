@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import './bulma/css/bulma.min.css';
 import './App.css';
 import LoginFields from './LoginFields';
 import WorkspaceList from './WorkspaceList';
@@ -13,7 +13,6 @@ function App() {
     return (
       <div className="App">
         <header className="App-header">
-          <h4>Workspaces</h4>
           <div>
             <WorkspaceList loggedInUser={loggedInUser} setLoggedInUser={setLoggedInUser}/>
           </div>
@@ -24,7 +23,7 @@ function App() {
     return (
       <div className="App">
         <header className="App-header">
-          <h1>NotSlack for Desktop</h1>
+          <img src="notslacklogo.png"></img>
           <div>
             <LoginFields loggedInAttempt={loggedInAttempt} setLoggedInAttempt={setLoggedInAttempt} setLoggedInUser={setLoggedInUser}
             />

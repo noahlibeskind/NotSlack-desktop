@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import './App.css';
+import './bulma/css/bulma.min.css';
+
 
 interface LoginProps {
     loggedInAttempt: number,
@@ -46,16 +49,27 @@ const LoginFields: React.FC<LoginProps> = ({ loggedInAttempt, setLoggedInAttempt
       };
 
     return (
-    <div className="InputStack">
-        <label>
-            Email:
-            <input type="text" value={email} onChange={handleEmailChange} />
-        </label>
-        <label>
-            Password:
-            <input type="password" value={password} onChange={handlePasswordChange} />
-        </label>
-        <button onClick={handleSubmit}>Login</button>
+    <div className="tile is-ancestor is-vertical">
+        <div className="tile is-parent is-8">
+            <div className="tile is-child is-8">
+                <p className="subtitle">Email</p>
+            </div>
+            <div className="tile is-child is-8">
+                <input className="input is-link" type="text" value={email} onChange={handleEmailChange} />
+
+            </div>
+        </div>
+        <div className="tile is-parent is-8">
+            <div className="tile is-child is-8">
+                <p className="subtitle">Password:</p>
+            </div>
+            <div className="tile is-child is-8">
+                <input className="input is-link" type="password" value={password} onChange={handlePasswordChange} />
+            </div>
+        </div>
+     
+            <button className="button is-responsive is-link" onClick={handleSubmit}>Login</button>
+        
     </div>
     );
 };
