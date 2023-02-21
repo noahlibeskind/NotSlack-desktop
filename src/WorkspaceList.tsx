@@ -10,7 +10,6 @@ interface Member {
   id: string,
   name: string,
   email: string,
-  password: string,
   accessToken: string
 }
 
@@ -34,6 +33,33 @@ interface Message {
   content: string;
 }
 
+interface SendMessage {
+  content: string
+}
+
+const DisplayDate = (string_date: string) => {
+  let date_secs = Date.parse(string_date);
+  let date_obj = new Date(date_secs);
+  var hours = date_obj.getHours();
+  var minutes = date_obj.getMinutes();
+  var newformat = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+
+  return (
+    date_obj.toLocaleString('en-US', {month: 'short'}) +
+    ' ' +
+    date_obj.getDate() +
+    ', ' +
+    String(date_obj.getFullYear()) +
+    ' at ' +
+    hours +
+    ':' +
+    (String(minutes).length < 2 ? '0' + String(minutes) : minutes) +
+    ' ' +
+    newformat
+  );
+};
+
 const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser }) => {
   const [members, setMembers] = useState<Member[]>([])
   const [memberMap, setMemberMap] = useState<{[key: string]: string}>({})
@@ -41,9 +67,11 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
   const [channels, setChannels] = useState<Channel[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
 
-
   const [currWorkspace, setCurrWorkspace] = useState<Workspace>();
   const [currChannel, setCurrChannel] = useState<Channel>();
+
+  const [messageContent, setMessageContent] = useState<string>('')
+  const [messageSent, setMessageSent] = useState<boolean>(false)
 
   useEffect(() => {
       fetch("http://10.0.0.57:8080/workspace", {
@@ -92,6 +120,9 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
   }, [loggedInUser]);
 
   useEffect(() => {
+    setCurrChannel(undefined)
+    setChannels([])
+    setMessages([])
     fetch("http://10.0.0.57:8080/workspace/channel/" + currWorkspace?.id, {
       method: 'GET',
       headers: {
@@ -109,7 +140,7 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
     })
     .then(data => setChannels(data))
     .catch(error => console.error(error));
-  }, [loggedInUser, currWorkspace, channels])
+  }, [loggedInUser, currWorkspace])
 
   useEffect(() => {
     fetch("http://10.0.0.57:8080/channel/message/" + currChannel?.id, {
@@ -129,86 +160,123 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
     })
     .then(data => setMessages(data))
     .catch(error => console.error(error));
-  }, [loggedInUser, currChannel, messages])
+    setMessageSent(false)
+  }, [loggedInUser, currChannel, messageSent])
+
+  const handleContentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageContent(event.target.value)
+  };
+
+  const handleSend = () => {
+    let content = messageContent;
+    fetch("http://10.0.0.57:8080/channel/message/" + currChannel?.id, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + loggedInUser?.accessToken,
+      }
+    })
+    .then(response => {
+      if (response.status === 200) {
+        return response.json()
+      } else {
+        throw new Error("Message send failure.");
+      }
+    })
+    .catch(error => {
+      console.error("Message send error:", error);
+    });
+    setMessageSent(true)
+  };
 
   return (
       <div className="tile is-ancestor">
         {/* Workspaces */}
-        <div className="tile is-parent is-vertical is-2">
+        <div className="tile is-parent is-vertical is-3">
           <div className="tile is-child">
             <p className="subtitle">Workspaces</p>
-          </div>
-          <ul>
-            {workspaces.map(workspace => (
-              <li key={workspace.id}>
-                <div className="tile is-parent">
-                {workspace.id === currWorkspace?.id ?
-                <div className="tile is-child notification is-link">
-                  <p className="is-size-6">
-                      {workspace.name}
-                  </p>
-                </div>
-                :
-                <div className="tile is-child notification" onClick={() => setCurrWorkspace(workspace)}>
-                  <p className="is-size-6">
-                      {workspace.name}
-                  </p>
-                </div>
-                }
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-        {/* Channels */}
-        <div className="tile is-parent is-vertical is-2">
-          <div className="tile is-child">
-              <p className="subtitle">Channels</p>
-          </div>
-        
-          <ul>
-            {channels.map(channel => (
-              <li key={channel.id}>
-                <div className="tile is-parent">
-                {channel.id === currChannel?.id ?
+            
+            <ul>
+              {workspaces.map(workspace => (
+                <li key={workspace.id}>
+                  <div className="tile is-parent">
+                  {workspace.id === currWorkspace?.id ?
                   <div className="tile is-child notification is-link">
                     <p className="is-size-6">
-                        {channel.name}
+                        {workspace.name}
                     </p>
                   </div>
                   :
-                  <div className="tile is-child notification" onClick={() => setCurrChannel(channel)}>
+                  <div className="tile is-child notification" onClick={() => setCurrWorkspace(workspace)}>
                     <p className="is-size-6">
-                        {channel.name}
+                        {workspace.name}
                     </p>
                   </div>
-                }
-                </div>
-              </li>
-            ))}
-          </ul>
+                  }
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        {/* Channels */}
+        <div className="tile is-parent is-vertical is-3">
+          <div className="tile is-child">
+            <p className="subtitle">Channels</p>
+            <ul>
+              {channels.map(channel => (
+                <li key={channel.id}>
+                  <div className="tile is-parent">
+                  {channel.id === currChannel?.id ?
+                    <div className="tile is-child notification is-link">
+                      <p className="is-size-6">
+                          {channel.name}
+                      </p>
+                    </div>
+                    :
+                    <div className="tile is-child notification" onClick={() => setCurrChannel(channel)}>
+                      <p className="is-size-6">
+                          {channel.name}
+                      </p>
+                    </div>
+                  }
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
         {/* Messages */}
-        <div className="tile is-parent is-vertical is-8">
+        <div className="tile is-parent is-vertical is-6">
           <div className="tile is-child">
             <p className="subtitle">Messages</p>
-          </div>
-          <ul>
-            {messages.map(message => (
-              <li key={message.id}>
-                <div className="tile is-parent">
-                  <div className="tile is-child notification">
-                    <p className="is-size-6">
-                      {message.content}
-                    </p>
-                    <p className="is-size-7">
-                      {memberMap[message.member]}
-                    </p>
+          
+            <ul>
+              {messages.map(message => (
+                <li key={message.id}>
+                  <div className="tile is-parent">
+                    <div className="tile is-child notification">
+                      <p className="is-size-6">
+                        {message.content}
+                      </p>
+                      <p className="is-size-7">
+                        {memberMap[message.member]}
+                      </p>
+                      <p className="is-size-7">
+                        {DisplayDate(message.posted.toString())}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="tile is-child">
+            <input className="input is-link" type="text" value={messageContent} onChange={handleContentChange} />
+            <button className="button is-responsive is-link" onClick={handleSend}>Send</button>
+          </div>
         </div>
       </div>
           

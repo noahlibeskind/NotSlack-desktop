@@ -12,11 +12,17 @@ function App() {
     console.log(loggedInUser);
     return (
       <div className="App">
-        <header className="App-header">
+        <header>
+          <figure className="image is-128x128">
+            <img src="notslacklogo.png"></img>
+          </figure>
+        </header>
+        <body>
           <div>
             <WorkspaceList loggedInUser={loggedInUser} setLoggedInUser={setLoggedInUser}/>
           </div>
-        </header>
+        </body>
+         
       </div>
     );
   } else {
