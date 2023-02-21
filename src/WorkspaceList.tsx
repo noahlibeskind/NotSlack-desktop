@@ -60,6 +60,26 @@ const DisplayDate = (string_date: string) => {
   );
 };
 
+const FetchMessages: any = (loggedInUser: Member, currChannel: Channel, setMessages: React.SetStateAction<any>) => {
+  fetch("http://10.0.0.57:8080/channel/message/" + currChannel?.id, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + loggedInUser?.accessToken,
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error("Failed to fetch messages");
+    }
+  })
+  .then(data => setMessages(data))
+  .catch(error => console.error(error));
+}
+
 const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser }) => {
   const [members, setMembers] = useState<Member[]>([])
   const [memberMap, setMemberMap] = useState<{[key: string]: string}>({})
@@ -143,24 +163,9 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
   }, [loggedInUser, currWorkspace])
 
   useEffect(() => {
-    fetch("http://10.0.0.57:8080/channel/message/" + currChannel?.id, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + loggedInUser?.accessToken,
-      }
-    })
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error("Failed to fetch messages");
-      }
-    })
-    .then(data => setMessages(data))
-    .catch(error => console.error(error));
-    setMessageSent(false)
+    if (currChannel) {
+      FetchMessages(loggedInUser, currChannel, setMessages);
+    }
   }, [loggedInUser, currChannel, messageSent])
 
   const handleContentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,6 +185,7 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
     })
     .then(response => {
       if (response.status === 200) {
+        FetchMessages(loggedInUser, currChannel, setMessages);
         return response.json()
       } else {
         throw new Error("Message send failure.");
@@ -188,7 +194,8 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
     .catch(error => {
       console.error("Message send error:", error);
     });
-    setMessageSent(true)
+    
+    setMessageContent('');
   };
 
   return (
