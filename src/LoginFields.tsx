@@ -23,7 +23,7 @@ const LoginFields: React.FC<LoginProps> = ({ loggedInAttempt, setLoggedInAttempt
   };
 
   const handleSubmit = () => {
-    fetch("http://10.0.0.57:8080/login", {
+    fetch("http://0.0.0.0:8080/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
       headers: {

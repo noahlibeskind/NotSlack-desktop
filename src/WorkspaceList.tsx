@@ -62,7 +62,7 @@ const DisplayDate = (string_date: string) => {
 };
 
 const FetchMessages: any = (loggedInUser: Member, currChannel: Channel, setMessages: React.SetStateAction<any>) => {
-  fetch("http://10.0.0.57:8080/channel/message/" + currChannel?.id, {
+  fetch("http://0.0.0.0:8080/channel/message/" + currChannel?.id, {
     method: 'GET',
     headers: {
       Accept: 'application/json',
@@ -85,12 +85,33 @@ const FetchMessages: any = (loggedInUser: Member, currChannel: Channel, setMessa
     }
   })
   .catch(error => console.error(error));
-
 }
 
-// const DeleteMessage: any = (setMessages: React.SetStateAction<any>) => {
-
-// }
+const DeleteMessage: any = (loggedInUser: Member , currChannel: Channel, message: Message, setMessages: React.SetStateAction<any>) => {
+  fetch("http://0.0.0.0:8080/message/" + message?.id, {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + loggedInUser?.accessToken,
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error("Failed to delete message");
+    }
+  })
+  .then(() => {
+    FetchMessages(loggedInUser, currChannel, setMessages)
+    var messageList = document.getElementById('message-list');
+    if (messageList) {
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+  })
+  .catch(error => console.error(error));
+}
 
 const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser }) => {
   const [members, setMembers] = useState<Member[]>([])
@@ -106,7 +127,7 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
   const [messageSent, setMessageSent] = useState<boolean>(false)
 
   useEffect(() => {
-      fetch("http://10.0.0.57:8080/workspace", {
+      fetch("http://0.0.0.0:8080/workspace", {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -128,7 +149,7 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
       .then(data => setWorkspaces(data))
       .catch(error => console.error(error));
 
-      fetch("http://10.0.0.57:8080/member", {
+      fetch("http://0.0.0.0:8080/member", {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -159,7 +180,7 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
     setCurrChannel(undefined)
     setChannels([])
     setMessages([])
-    fetch("http://10.0.0.57:8080/workspace/channel/" + currWorkspace?.id, {
+    fetch("http://0.0.0.0:8080/workspace/channel/" + currWorkspace?.id, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -190,7 +211,7 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
 
   const handleSend = () => {
     let content = messageContent;
-    fetch("http://10.0.0.57:8080/channel/message/" + currChannel?.id, {
+    fetch("http://0.0.0.0:8080/channel/message/" + currChannel?.id, {
       method: "POST",
       body: JSON.stringify({ content }),
       headers: {
@@ -289,6 +310,16 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
                     <p className="is-size-7">
                       {DisplayDate(message.posted.toString())}
                     </p>
+                  </div>
+                  <div className="is-child notification">
+                    {message.member == loggedInUser.id ?
+                    <button className="button is-danger" onClick={DeleteMessage(loggedInUser, message, currChannel, setMessages)}>
+                      Delete
+                    </button>
+                    :
+                    <></>
+                    }
+                    
                   </div>
                 </div>
               </li>
