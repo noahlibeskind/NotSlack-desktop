@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import './App.css';
 
 interface WSListProps {
   // setSelectedWorkSpace: React.Dispatch<React.SetStateAction<string>>;
@@ -76,9 +77,20 @@ const FetchMessages: any = (loggedInUser: Member, currChannel: Channel, setMessa
       throw new Error("Failed to fetch messages");
     }
   })
-  .then(data => setMessages(data))
+  .then(data => {
+    setMessages(data);
+    var messageList = document.getElementById('message-list');
+    if (messageList) {
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+  })
   .catch(error => console.error(error));
+
 }
+
+// const DeleteMessage: any = (setMessages: React.SetStateAction<any>) => {
+
+// }
 
 const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser }) => {
   const [members, setMembers] = useState<Member[]>([])
@@ -104,6 +116,10 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
       })
       .then(response => {
         if (response.ok) {
+          var messageList = document.getElementById('message-list');
+          if (messageList) {
+            messageList.scrollTop = messageList.scrollHeight;
+          }
           return response.json();
         } else {
           throw new Error("Failed to fetch workspaces");
@@ -259,31 +275,37 @@ const WorkspaceList: React.FC<WSListProps> = ({ loggedInUser, setLoggedInUser })
         <div className="tile is-parent is-vertical is-6">
           <div className="tile is-child">
             <p className="subtitle">Messages</p>
-          
-            <ul>
-              {messages.map(message => (
-                <li key={message.id}>
-                  <div className="tile is-parent">
-                    <div className="tile is-child notification">
-                      <p className="is-size-6">
-                        {message.content}
-                      </p>
-                      <p className="is-size-7">
-                        {memberMap[message.member]}
-                      </p>
-                      <p className="is-size-7">
-                        {DisplayDate(message.posted.toString())}
-                      </p>
-                    </div>
+            <ul id="message-list">
+            {messages.map(message => (
+              <li key={message.id}>
+                <div className="tile is-parent">
+                  <div className="tile is-child notification">
+                    <p className="is-size-6">
+                      {message.content}
+                    </p>
+                    <p className="is-size-7">
+                      {memberMap[message.member]}
+                    </p>
+                    <p className="is-size-7">
+                      {DisplayDate(message.posted.toString())}
+                    </p>
                   </div>
-                </li>
-              ))}
-            </ul>
+                </div>
+              </li>
+            ))}
+            </ul> 
           </div>
-          <div className="tile is-child">
-            <input className="input is-link" type="text" value={messageContent} onChange={handleContentChange} />
-            <button className="button is-responsive is-link" onClick={handleSend}>Send</button>
+          <div className="tile is-parent is-12">
+            
+            <div className="tile is-child is-10">
+              <input className="input is-link" type="text" value={messageContent} onChange={handleContentChange} />
+            </div>
+            <div className="tile is-child is-2">
+              <button className="button is-link" onClick={handleSend}>Send</button>
+            </div>
+            
           </div>
+            
         </div>
       </div>
           

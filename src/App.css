@@ -32,6 +32,11 @@
   flex-direction: column;
 }
 
+.tile.is-child ul {
+  height: 58vh; /* Set a fixed height for the <ul> elements */
+  overflow-y: auto; /* Make the content scrollable */
+}
+
 .form-field {
   font-family: inherit;
   width: 100%;

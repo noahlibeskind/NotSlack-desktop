@@ -328,15 +328,15 @@ html {
           text-size-adjust: 100%;
 }
 
-article,
+article {
+  height: 100%;
+}
 aside,
 figure,
 footer,
 header,
 hgroup,
-section {
-  display: block;
-}
+section,
 
 body,
 button,
